@@ -130,56 +130,35 @@ class FKBAEProvider : MainAPI() {
 
 
     override suspend fun loadLinks(
-
         data: String,
-
         isCasting: Boolean,
-
         subtitleCallback: (SubtitleFile) -> Unit,
-
         callback: (ExtractorLink) -> Unit
-
     ): Boolean {
-
-
 
         val page = app.get(data).document
 
-
-
         val iframe = page.select("iframe[src], iframe[data-src-no-ap]")
-
             .firstOrNull()
 
-
-
         val iframeUrl = iframe?.attr("src")
-
             ?.takeIf { it.isNotBlank() }
-
             ?: iframe?.attr("data-src-no-ap")
-
                 ?.takeIf { it.isNotBlank() }
+            ?: return false
 
-
-
-        if (iframeUrl == null) return false
-
-
-
-        val player = app.get(iframeUrl).text
-
-
+        val player = app.get(
+            iframeUrl,
+            referer = data
+        ).text
 
         val videoUrl = Regex(
-
-            """file\s*:\s*["']([^"']+)["']"""
-
+            """<source[^>]+src=["']([^"']+)["']"""
         ).find(player)?.groupValues?.get(1)
-
-
-
-        if (videoUrl == null) return false
+            ?: Regex(
+                """file\s*:\s*["']([^"']+)["']"""
+            ).find(player)?.groupValues?.get(1)
+            ?: return false
 
         callback(
             ExtractorLink(
@@ -193,8 +172,6 @@ class FKBAEProvider : MainAPI() {
         )
 
         return true
-
     }
 
 }
-
