@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "name": "AnimeON",
+      "version": 39,
+      "url": "https://github.com/ensarerdeve/cloud-deneme/releases/download/v39/AnimeONProvider-release.aar",
+      "icon": "https://animeon.club/assets/images/short-logo.png"
+    }
+  ]
+}
