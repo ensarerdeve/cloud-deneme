@@ -1,10 +1,24 @@
-{
-  "plugins": [
-    {
-      "name": "AnimeON",
-      "version": 39,
-      "url": "https://github.com/ensarerdeve/cloud-deneme/releases/download/v39/AnimeONProvider-release.aar",
-      "icon": "https://animeon.club/assets/images/short-logo.png"
-    }
-  ]
-}
+[
+  {
+    "iconUrl": "https://animeon.club/assets/images/short-logo.png",
+    "fileHash": "sha256-5a58ef9a21791525e0379f02570ffac618bf50227c298d0f3db69e8affbaa499",
+    "apiVersion": 1,
+    "repositoryUrl": "https://github.com/ensarerdeve/cloud-deneme",
+    "fileSize": 99230,
+    "status": 1,
+    "language": "uk",
+    "authors": [
+      "Ensar"
+    ],
+    "tvTypes": [
+      "Anime",
+      "AnimeMovie",
+      "OVA"
+    ],
+    "version": 39,
+    "internalName": "AnimeONProvider",
+    "description": "AnimeON - Дивитися аніме українською",
+    "url": "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/repo/AnimeONProvider.cs3",
+    "name": "AnimeONProvider"
+  }
+]
