@@ -19,9 +19,9 @@ class FKBAEProvider : MainAPI() {
 
     override var lang = "en"
 
-    override val hasMainPage = false
+    override val hasMainPage = true
 
-    override val hasQuickSearch = false
+    override val hasQuickSearch = true
 
     override val hasDownloadSupport = true
 
@@ -34,6 +34,56 @@ class FKBAEProvider : MainAPI() {
     )
 
 
+
+    override val mainPage = mainPageOf(
+        "$mainUrl/" to "Latest",
+        "$mainUrl/page/%d/" to "Latest"
+    )
+
+    override suspend fun getMainPage(
+        page: Int,
+        request: MainPageRequest
+    ): HomePageResponse {
+        val url = if (page == 1) {
+            "$mainUrl/"
+        } else {
+            "$mainUrl/page/$page/"
+        }
+
+        val document = app.get(url).document
+
+        val items = document
+            .select("a[href^=\"$mainUrl/\"]")
+            .mapNotNull { element ->
+                val href = element.attr("href")
+                    .trim()
+                    .takeIf { it.matches(Regex("""$mainUrl/\d+/?""")) }
+                    ?: return@mapNotNull null
+
+                val title = element.attr("title")
+                    .trim()
+                    .ifBlank {
+                        element.select("img").attr("alt").trim()
+                    }
+                    .ifBlank {
+                        return@mapNotNull null
+                    }
+
+                val poster = element.select("img").attr("src")
+                    .takeIf { it.isNotBlank() }
+
+                newMovieSearchResponse(
+                    name = title,
+                    url = href,
+                    type = TvType.Movie
+                ) {
+                    posterUrl = poster
+                }
+            }
+            .distinctBy { it.url }
+
+        return newHomePageResponse(listOf(HomePageList("Latest", items)), hasNext = items.size >= 20)
+    }
 
     override suspend fun load(url: String): LoadResponse {
 
