@@ -167,7 +167,7 @@ class FKBAEProvider : MainAPI() {
                 url = videoUrl,
                 referer = iframeUrl,
                 quality = 720,
-                type = com.lagradost.cloudstream3.utils.ExtractorLinkType.VIDEO
+                type = if (videoUrl.contains(".m3u8")) com.lagradost.cloudstream3.utils.ExtractorLinkType.M3U8 else com.lagradost.cloudstream3.utils.ExtractorLinkType.VIDEO
             )
         )
 
