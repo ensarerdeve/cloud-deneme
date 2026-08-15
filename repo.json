@@ -1,6 +1,6 @@
 {
-  "name": "Ensar Cloudstream Extensions",
-  "description": "Ensar's Cloudstream extensions",
+  "name": "Ensar CloudStream",
+  "description": "Ensar'ın CloudStream repository'si",
   "manifestVersion": 1,
   "pluginLists": [
     "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/plugins.json"
