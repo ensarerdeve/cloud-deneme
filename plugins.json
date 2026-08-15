@@ -1,9 +1,9 @@
 [
   {
-    "fileHash": "sha256-907a6047f2f70f22455eff898209511abee662ee37bdfbb986b2c1cfeaa04c22",
+    "fileHash": "sha256-61d96231ab60a2ed5f79b461ff3fa44a27407c137829d56bac4d5597737335e4",
     "apiVersion": 1,
     "repositoryUrl": "https://github.com/ensarerdeve/cloud-deneme",
-    "fileSize": 9678,
+    "fileSize": 9680,
     "status": 1,
     "language": "en",
     "authors": [
@@ -12,7 +12,7 @@
     "tvTypes": [
       "Anime"
     ],
-    "version": 2,
+    "version": 3,
     "internalName": "FKBAEProvider",
     "description": "FKBAE Provider",
     "url": "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/repo/FKBAEProvider.cs3",
