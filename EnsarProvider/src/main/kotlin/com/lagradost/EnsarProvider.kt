@@ -229,7 +229,10 @@ class EnsarProvider : MainAPI() {
 
 
 
+        println("ENSAR DEBUG VIDEO DATA: $data")
         val page = app.get(data).document
+        println("ENSAR DEBUG VIDEO TITLE: ${page.title()}")
+        println("ENSAR DEBUG IFRAME COUNT: ${page.select("iframe[src], iframe[data-src-no-ap]").size}")
 
 
 
