@@ -6,6 +6,8 @@ package com.lagradost
 import com.lagradost.cloudstream3.*
 
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.ExtractorLinkType
+import com.lagradost.cloudstream3.utils.newExtractorLink
 
 
 
@@ -160,16 +162,20 @@ class FKBAEProvider : MainAPI() {
             ).find(player)?.groupValues?.get(1)
             ?: return false
 
-        callback(
-            ExtractorLink(
-                source = name,
-                name = "Direct",
-                url = videoUrl,
-                referer = iframeUrl,
-                quality = 720,
-                type = if (videoUrl.contains(".m3u8")) com.lagradost.cloudstream3.utils.ExtractorLinkType.M3U8 else com.lagradost.cloudstream3.utils.ExtractorLinkType.VIDEO
-            )
-        )
+        newExtractorLink(
+            source = name,
+            name = "Direct",
+            url = videoUrl,
+            type = if (videoUrl.contains(".m3u8")) {
+                ExtractorLinkType.M3U8
+            } else {
+                ExtractorLinkType.VIDEO
+            }
+        ) {
+            this.referer = iframeUrl
+            this.quality = 720
+            callback(this)
+        }
 
         return true
     }

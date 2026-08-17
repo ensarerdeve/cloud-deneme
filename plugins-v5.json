@@ -17,5 +17,24 @@
     "description": "FKBAE Provider",
     "url": "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/repo/FKBAEProvider.cs3",
     "name": "FKBAEProvider"
+  },
+  {
+    "fileHash": "sha256-f0c6658cff11e82f07ec455baaf62b77bebc288de9a7b37a34fb37337c9d76bd",
+    "apiVersion": 1,
+    "repositoryUrl": "https://github.com/ensarerdeve/cloud-deneme",
+    "fileSize": 11925,
+    "status": 1,
+    "language": "en",
+    "authors": [
+      "Ensar"
+    ],
+    "tvTypes": [
+      "Movie"
+    ],
+    "version": 1,
+    "internalName": "EnsarProvider",
+    "description": "Ensar Video Provider",
+    "url": "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/repo/EnsarProvider.cs3",
+    "name": "EnsarProvider"
   }
 ]
