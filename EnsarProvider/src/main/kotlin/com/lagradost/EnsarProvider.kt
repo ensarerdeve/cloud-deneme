@@ -6,7 +6,9 @@ package com.lagradost
 import com.lagradost.cloudstream3.*
 
 import com.lagradost.cloudstream3.utils.ExtractorLink
+
 import com.lagradost.cloudstream3.utils.ExtractorLinkType
+
 import com.lagradost.cloudstream3.utils.newExtractorLink
 
 
@@ -20,6 +22,8 @@ class EnsarProvider : MainAPI() {
     override var name = "Ensar"
 
     override var lang = "en"
+
+
 
     override val hasMainPage = true
 
@@ -38,56 +42,136 @@ class EnsarProvider : MainAPI() {
 
 
     override val mainPage = mainPageOf(
+
         "$mainUrl/" to "Latest",
+
         "$mainUrl/page/%d/" to "Latest"
+
     )
 
+
+
     override suspend fun getMainPage(
-        page: Int,
-        request: MainPageRequest
-    ): HomePageResponse {
-        val url = if (page == 1) {
-            "$mainUrl/"
-        } else {
-            "$mainUrl/page/$page/"
-        }
 
-        val document = app.get(url).document
+    page: Int,
 
-        val items = document
-            .select("a[href^=\"$mainUrl/\"]")
-            .mapNotNull { element ->
-                val href = element.attr("href")
-                    .trim()
-                    .takeIf { it.matches(Regex("""$mainUrl/\d+/?""")) }
-                    ?: return@mapNotNull null
+    request: MainPageRequest
 
-                val title = element.attr("title")
-                    .trim()
-                    .ifBlank {
-                        element.select("img").attr("alt").trim()
-                    }
-                    .ifBlank {
-                        return@mapNotNull null
-                    }
+): HomePageResponse {
 
-                val poster = element.select("img").attr("src")
-                    .takeIf { it.isNotBlank() }
 
-                newMovieSearchResponse(
-                    name = title,
-                    url = href,
-                    type = TvType.Movie
-                ) {
-                    posterUrl = poster
-                }
-            }
-            .distinctBy { it.url }
 
-        return newHomePageResponse(listOf(HomePageList("Latest", items)), hasNext = items.size >= 20)
+    val url = if (page == 1) {
+
+        "$mainUrl/"
+
+    } else {
+
+        "$mainUrl/page/$page/"
+
     }
 
+
+
+    println("ENSAR DEBUG URL: $url")
+    val document = app.get(url).document
+    println("ENSAR DEBUG TITLE: ${document.title()}")
+    println("ENSAR DEBUG HTML SIZE: ${document.html().length}")
+    println("ENSAR DEBUG CLOUDFLARE: ${document.html().contains("Just a moment", ignoreCase = true)}")
+    println("ENSAR DEBUG PORN LINKS: ${document.select("a[href*='/porn/']").size}")
+
+
+
+    val items = document
+
+        .select("a[href*=\"/porn/\"]")
+
+        .mapNotNull { element ->
+
+
+
+            val href = element.attr("href")
+
+                .trim()
+
+                .takeIf {
+
+                    it.matches(
+
+                        Regex("""${Regex.escape(mainUrl)}/porn/[^/?#]+/?""")
+
+                    )
+
+                }
+
+                ?: return@mapNotNull null
+
+
+
+            val title = element.attr("title")
+
+                .trim()
+
+                .ifBlank {
+
+                    element.select("img").attr("alt").trim()
+
+                }
+
+                .ifBlank {
+
+                    return@mapNotNull null
+
+                }
+
+
+
+            val poster = element.select("img")
+
+                .attr("src")
+
+                .takeIf { it.isNotBlank() }
+
+
+
+            newMovieSearchResponse(
+
+                name = title,
+
+                url = href,
+
+                type = TvType.Movie
+
+            ) {
+
+                posterUrl = poster
+
+            }
+
+        }
+
+        .distinctBy { it.url }
+
+
+
+    return newHomePageResponse(
+
+        listOf(
+
+            HomePageList("Latest", items)
+
+        ),
+
+        hasNext = items.size >= 20
+
+    )
+
+}
+
+
     override suspend fun load(url: String): LoadResponse {
+
+
 
         val document = app.get(url).document
 
@@ -132,67 +216,128 @@ class EnsarProvider : MainAPI() {
 
 
     override suspend fun loadLinks(
+
         data: String,
+
         isCasting: Boolean,
+
         subtitleCallback: (SubtitleFile) -> Unit,
+
         callback: (ExtractorLink) -> Unit
+
     ): Boolean {
+
+
 
         val page = app.get(data).document
 
+
+
         val iframeUrl = page.select("iframe[src], iframe[data-src-no-ap]")
+
             .firstOrNull()
+
             ?.let {
+
                 it.attr("src").takeIf { src -> src.isNotBlank() }
+
                     ?: it.attr("data-src-no-ap").takeIf { src -> src.isNotBlank() }
+
             }
+
             ?: return false
+
+
 
         val filecode = iframeUrl
+
             .substringAfterLast("/")
+
             .substringBefore("?")
+
             .takeIf { it.isNotBlank() }
+
             ?: return false
+
+
 
         val response = app.post(
+
             "https://vidara.to/api/stream",
+
             headers = mapOf(
+
                 "Origin" to "https://vidara.to",
+
                 "Referer" to iframeUrl
+
             ),
+
             json = mapOf(
+
                 "filecode" to filecode,
+
                 "device" to "web"
+
             )
+
         ).parsedSafe<VidaraStreamResponse>() ?: return false
 
-        val videoUrl = response.streamingUrl
+
+
+        val videoUrl = response.streaming_url
+
             .takeIf { it.isNotBlank() }
+
             ?: return false
 
+
+
         newExtractorLink(
+
             source = name,
+
             name = "Vidara",
+
             url = videoUrl,
+
             type = if (videoUrl.contains(".m3u8")) {
+
                 ExtractorLinkType.M3U8
+
             } else {
+
                 ExtractorLinkType.VIDEO
+
             }
+
         ) {
+
             this.referer = "https://vidara.to/"
+
             this.quality = 0
+
             callback(this)
+
         }
 
+
+
         return true
+
     }
 
 
-data class VidaraStreamResponse(
-    val streamingUrl: String = "",
-    val filecode: String = "",
-    val title: String? = null
-)
+
+    data class VidaraStreamResponse(
+
+        val streaming_url: String = "",
+
+        val filecode: String = "",
+
+        val title: String? = null
+
+    )
 
 }
+
