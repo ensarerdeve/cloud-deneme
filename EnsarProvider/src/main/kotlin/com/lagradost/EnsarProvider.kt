@@ -216,118 +216,63 @@ class EnsarProvider : MainAPI() {
 
 
     override suspend fun loadLinks(
-
         data: String,
-
         isCasting: Boolean,
-
         subtitleCallback: (SubtitleFile) -> Unit,
-
         callback: (ExtractorLink) -> Unit
-
     ): Boolean {
 
-
-
-        println("ENSAR DEBUG VIDEO DATA: $data")
-        val page = app.get(data).document
-        println("ENSAR DEBUG VIDEO TITLE: ${page.title()}")
-        println("ENSAR DEBUG IFRAME COUNT: ${page.select("iframe[src], iframe[data-src-no-ap]").size}")
-
-
+        val page = app.get(
+            data,
+            headers = mapOf(
+                "User-Agent" to "Mozilla/5.0",
+                "Referer" to mainUrl
+            )
+        ).document
 
         val iframeUrl = page.select("iframe[src], iframe[data-src-no-ap]")
-
             .firstOrNull()
-
             ?.let {
-
                 it.attr("src").takeIf { src -> src.isNotBlank() }
-
                     ?: it.attr("data-src-no-ap").takeIf { src -> src.isNotBlank() }
-
             }
-
             ?: return false
-
-
 
         val filecode = iframeUrl
-
             .substringAfterLast("/")
-
             .substringBefore("?")
-
             .takeIf { it.isNotBlank() }
-
             ?: return false
-
-
 
         val response = app.post(
-
             "https://vidara.to/api/stream",
-
             headers = mapOf(
-
+                "Accept" to "application/json",
+                "Content-Type" to "application/json",
                 "Origin" to "https://vidara.to",
-
-                "Referer" to iframeUrl
-
+                "Referer" to "https://vidara.to/",
+                "User-Agent" to "Mozilla/5.0"
             ),
-
             json = mapOf(
-
                 "filecode" to filecode,
-
                 "device" to "web"
-
             )
-
         ).parsedSafe<VidaraStreamResponse>() ?: return false
 
-
-
         val videoUrl = response.streaming_url
-
-            .takeIf { it.isNotBlank() }
-
+            .takeIf { it.startsWith("http") }
             ?: return false
 
-
-
         newExtractorLink(
-
-            source = name,
-
+            source = "Vidara",
             name = "Vidara",
-
             url = videoUrl,
-
-            type = if (videoUrl.contains(".m3u8")) {
-
-                ExtractorLinkType.M3U8
-
-            } else {
-
-                ExtractorLinkType.VIDEO
-
+            type = ExtractorLinkType.M3U8
+        ) {
+            this.referer = "https://vidara.to/"
             }
 
-        ) {
-
-            this.referer = "https://vidara.to/"
-
-            this.quality = 0
-
-            callback(this)
-
-        }
-
-
-
         return true
-
     }
 
 
