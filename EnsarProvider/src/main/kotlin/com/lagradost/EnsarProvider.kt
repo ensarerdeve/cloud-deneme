@@ -6,6 +6,7 @@ package com.lagradost
 import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.CloudflareKiller
+import okhttp3.OkHttpClient
 
 import com.lagradost.cloudstream3.utils.ExtractorLink
 
@@ -274,8 +275,7 @@ class EnsarProvider : MainAPI() {
                 "Sec-Fetch-Mode" to "navigate",
                 "Sec-Fetch-Site" to "same-origin",
                 "Upgrade-Insecure-Requests" to "1"
-            ),
-            interceptor = CloudflareKiller()
+            )
         )
 
         Log.i("ENSAR_RESPONSE", "STATUS=${httpResponse.code}")
