@@ -279,10 +279,10 @@ for (keyword in listOf("iframe", "video", "source", "embed", "m3u8", "mp4", "pla
         Log.i("ENSAR_LINKS", "HTML SCRIPT COUNT=${page.select("script").size}")
 
         page.select("script").forEachIndexed { i, script ->
-            val text = script.data()
+            val text = script.html()
 
-            Log.i("ENSAR_SCRIPT", "SCRIPT[$i] DATA LENGTH=${text.length}")
-            Log.i("ENSAR_SCRIPT", "SCRIPT[$i] DATA=${text.take(10000)}")
+            Log.i("ENSAR_SCRIPT", "SCRIPT[$i] HTML LENGTH=${text.length}")
+            Log.i("ENSAR_SCRIPT", "SCRIPT[$i] HTML=${text.take(10000)}")
         }
 
         page.select("iframe, video, embed").forEachIndexed { index, element ->
