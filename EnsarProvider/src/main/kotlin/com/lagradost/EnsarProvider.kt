@@ -228,13 +228,21 @@ class EnsarProvider : MainAPI() {
         Log.i("ENSAR_LINKS", "loadLinks BASLADI")
         Log.i("ENSAR_LINKS", "data=$data")
 
-        val page = app.get(
+        val response = app.get(
             data,
             headers = mapOf(
                 "User-Agent" to "Mozilla/5.0",
                 "Referer" to mainUrl
             )
-        ).document
+        )
+
+        Log.i("ENSAR_RESPONSE", "STATUS=${response.code}")
+        Log.i("ENSAR_RESPONSE", "URL=${response.url}")
+        Log.i("ENSAR_RESPONSE", "CONTENT_TYPE=${response.headers["Content-Type"]}")
+        Log.i("ENSAR_RESPONSE", "LOCATION=${response.headers["Location"]}")
+        Log.i("ENSAR_RESPONSE", "SERVER=${response.headers["Server"]}")
+
+        val page = response.document
 
         Log.i("ENSAR_LINKS", "HTML IFRAME COUNT=${page.select("iframe").size}")
 
