@@ -3,6 +3,7 @@ package com.lagradost
 
 
 
+import android.util.Log
 import com.lagradost.cloudstream3.*
 
 import com.lagradost.cloudstream3.utils.ExtractorLink
@@ -222,8 +223,8 @@ class EnsarProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
 
-        println("ENSAR LINKS: loadLinks başladı")
-        println("ENSAR LINKS: data=$data")
+        Log.i("ENSAR_LINKS", "loadLinks BASLADI")
+        Log.i("ENSAR_LINKS", "data=$data")
 
         val page = app.get(
             data,
@@ -240,22 +241,22 @@ class EnsarProvider : MainAPI() {
                     ?: it.attr("data-src-no-ap").takeIf { src -> src.isNotBlank() }
             }
             ?: run {
-                println("ENSAR LINKS: iframe bulunamadı")
+                Log.i("ENSAR_LINKS", "iframe BULUNAMADI")
                 return false
             }
 
-        println("ENSAR LINKS: iframe=$iframeUrl")
+        Log.i("ENSAR_LINKS", "iframe=$iframeUrl")
 
         val filecode = iframeUrl
             .substringAfterLast("/")
             .substringBefore("?")
             .takeIf { it.isNotBlank() }
             ?: run {
-                println("ENSAR LINKS: filecode bulunamadı")
+                Log.i("ENSAR_LINKS", "filecode BULUNAMADI")
                 return false
             }
 
-        println("ENSAR LINKS: filecode=$filecode")
+        Log.i("ENSAR_LINKS", "filecode=$filecode")
 
         val response = app.post(
             "https://vidara.to/api/stream",
@@ -272,18 +273,18 @@ class EnsarProvider : MainAPI() {
             )
         ).parsedSafe<VidaraStreamResponse>()
             ?: run {
-                println("ENSAR LINKS: Vidara response parse edilemedi")
+                Log.i("ENSAR_LINKS", "VIDARA RESPONSE PARSE EDILEMEDI")
                 return false
             }
 
         val videoUrl = response.streaming_url
             .takeIf { it.startsWith("http") }
             ?: run {
-                println("ENSAR LINKS: streaming_url yok")
+                Log.i("ENSAR_LINKS", "STREAMING_URL YOK")
                 return false
             }
 
-        println("ENSAR LINKS: videoUrl=$videoUrl")
+        Log.i("ENSAR_LINKS", "videoUrl=$videoUrl")
 
         val link = newExtractorLink(
             source = "Vidara",
@@ -296,7 +297,7 @@ class EnsarProvider : MainAPI() {
 
         callback(link)
 
-        println("ENSAR LINKS: callback gönderildi")
+        Log.i("ENSAR_LINKS", "CALLBACK GONDERILDI")
 
         return true
     }
