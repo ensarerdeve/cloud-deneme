@@ -19,6 +19,8 @@ import com.lagradost.cloudstream3.utils.newExtractorLink
 
 class EnsarProvider : MainAPI() {
 
+    private val cfKiller = CloudflareKiller()
+
 
 
 
@@ -80,7 +82,7 @@ class EnsarProvider : MainAPI() {
 
 
     println("ENSAR DEBUG URL: $url")
-    val document = app.get(url).document
+    val document = app.get(url, interceptor = cfKiller).document
     println("ENSAR DEBUG TITLE: ${document.title()}")
     println("ENSAR DEBUG HTML SIZE: ${document.html().length}")
     println("ENSAR DEBUG CLOUDFLARE: ${document.html().contains("Just a moment", ignoreCase = true)}")
@@ -213,7 +215,7 @@ class EnsarProvider : MainAPI() {
 
 
 
-        val document = app.get(url).document
+        val document = app.get(url, interceptor = cfKiller).document
 
 
 
@@ -279,7 +281,7 @@ class EnsarProvider : MainAPI() {
                 "Sec-Fetch-Site" to "same-origin",
                 "Upgrade-Insecure-Requests" to "1"
             ),
-            interceptor = CloudflareKiller()
+            interceptor = cfKiller
         )
 
         Log.i("ENSAR_RESPONSE", "STATUS=${httpResponse.code}")
