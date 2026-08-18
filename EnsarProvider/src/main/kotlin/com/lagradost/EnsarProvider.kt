@@ -222,6 +222,8 @@ class EnsarProvider : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+    println("ENSAR LOADLINKS ENTERED")
+    Log.e("ENSAR_LINKS", "🔥 LOADLINKS ENTERED data=$data")
 
         Log.i("ENSAR_LINKS", "loadLinks BASLADI")
         Log.i("ENSAR_LINKS", "data=$data")
