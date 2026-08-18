@@ -241,6 +241,7 @@ class EnsarProvider : MainAPI() {
         Log.i("ENSAR_RESPONSE", "CONTENT_TYPE=${httpResponse.headers["Content-Type"]}")
         Log.i("ENSAR_RESPONSE", "LOCATION=${httpResponse.headers["Location"]}")
         Log.i("ENSAR_RESPONSE", "SERVER=${httpResponse.headers["Server"]}")
+        Log.i("ENSAR_RESPONSE", "SET_COOKIE=${httpResponse.headers["Set-Cookie"]}")
 
         val page = httpResponse.document
 
@@ -330,7 +331,7 @@ for (keyword in listOf("iframe", "video", "source", "embed", "m3u8", "mp4", "pla
                 "Accept" to "application/json",
                 "Content-Type" to "application/json",
                 "Origin" to "https://vidara.to",
-                "Referer" to "https://vidara.to/",
+                "Referer" to "https://vidara.to/e/$filecode",
                 "User-Agent" to "Mozilla/5.0"
             ),
             json = mapOf(
@@ -358,7 +359,7 @@ for (keyword in listOf("iframe", "video", "source", "embed", "m3u8", "mp4", "pla
             url = videoUrl,
             type = ExtractorLinkType.M3U8
         ) {
-            referer = "https://vidara.to/"
+            referer = "https://vidara.to/e/$filecode"
         }
 
         callback(link)

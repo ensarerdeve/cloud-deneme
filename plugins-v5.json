@@ -19,10 +19,10 @@
     "name": "FKBAEProvider"
   },
   {
-    "fileHash": "sha256-6f8c3f77d5611bc48d6d1d2b2603cd6b2ece3b8c884c0b69cd28c180378d572d",
+    "fileHash": "sha256-5e2c89bf77ae8dc6b3214f08c9f19e5620011e87fd9c3892a6a807722864e491",
     "apiVersion": 1,
     "repositoryUrl": "https://github.com/ensarerdeve/cloud-deneme",
-    "fileSize": 15250,
+    "fileSize": 15277,
     "status": 1,
     "language": "en",
     "authors": [
