@@ -81,6 +81,15 @@ class EnsarProvider : MainAPI() {
     println("ENSAR DEBUG CLOUDFLARE: ${document.html().contains("Just a moment", ignoreCase = true)}")
     println("ENSAR DEBUG PORN LINKS: ${document.select("a[href*='/porn/']").size}")
 
+    document
+        .select("a[href*=\"/porn/\"]")
+        .take(3)
+        .forEachIndexed { i, element ->
+            println("========== ENSAR ELEMENT $i ==========")
+            println(element.outerHtml().take(5000))
+            println("======================================")
+        }
+
 
 
     val items = document
