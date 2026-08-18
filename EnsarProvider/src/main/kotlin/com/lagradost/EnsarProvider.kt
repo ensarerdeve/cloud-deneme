@@ -81,6 +81,31 @@ class EnsarProvider : MainAPI() {
     println("ENSAR DEBUG CLOUDFLARE: ${document.html().contains("Just a moment", ignoreCase = true)}")
     println("ENSAR DEBUG PORN LINKS: ${document.select("a[href*='/porn/']").size}")
 
+    val ensarHtml = document.html()
+    val ensarLower = ensarHtml.lowercase()
+
+    for (keyword in listOf("vidara", "iframe", "embed", "filecode", "data-src", "player")) {
+        println("ENSAR MAIN HAS $keyword = ${ensarLower.contains(keyword)}")
+    }
+
+    for (keyword in listOf("vidara", "iframe", "embed", "filecode", "data-src", "player")) {
+        var pos = 0
+        var count = 0
+
+        while (count < 5) {
+            val found = ensarLower.indexOf(keyword, pos)
+            if (found == -1) break
+
+            val from = maxOf(0, found - 300)
+            val to = minOf(ensarHtml.length, found + 1000)
+
+            println("ENSAR MAIN [$keyword] ${ensarHtml.substring(from, to)}")
+
+            pos = found + keyword.length
+            count++
+        }
+    }
+
     document
         .select("a[href*=\"/porn/\"]")
         .take(3)
