@@ -239,6 +239,23 @@ class EnsarProvider : MainAPI() {
         Log.i("ENSAR_LINKS", "HTML IFRAME COUNT=${page.select("iframe").size}")
         Log.i("ENSAR_LINKS", "HTML VIDEO COUNT=${page.select("video").size}")
         Log.i("ENSAR_LINKS", "HTML EMBED COUNT=${page.select("embed").size}")
+        Log.i("ENSAR_LINKS", "HTML SCRIPT COUNT=${page.select("script").size}")
+
+        page.select("script").forEachIndexed { i, script ->
+            val text = script.data()
+
+            if (
+                text.contains("iframe", ignoreCase = true) ||
+                text.contains("player", ignoreCase = true) ||
+                text.contains("video", ignoreCase = true) ||
+                text.contains("vidara", ignoreCase = true)
+            ) {
+                Log.i(
+                    "ENSAR_LINKS",
+                    "SCRIPT[$i]=${text.take(3000)}"
+                )
+            }
+        }
 
         page.select("iframe, video, embed").forEachIndexed { index, element ->
             Log.i(
