@@ -268,6 +268,8 @@ class EnsarProvider : MainAPI() {
 
         Log.i("ENSAR_LINKS", "loadLinks BASLADI")
         Log.i("ENSAR_LINKS", "data=$data")
+        Log.i("ENSAR_CF", "cookies=${cfKiller.savedCookies}")
+        Log.i("ENSAR_CF", "cookies=${cfKiller.savedCookies}")
 
         val httpResponse = app.get(
             data,
