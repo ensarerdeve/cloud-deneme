@@ -281,17 +281,8 @@ for (keyword in listOf("iframe", "video", "source", "embed", "m3u8", "mp4", "pla
         page.select("script").forEachIndexed { i, script ->
             val text = script.data()
 
-            if (
-                text.contains("iframe", ignoreCase = true) ||
-                text.contains("player", ignoreCase = true) ||
-                text.contains("video", ignoreCase = true) ||
-                text.contains("vidara", ignoreCase = true)
-            ) {
-                Log.i(
-                    "ENSAR_LINKS",
-                    "SCRIPT[$i]=${text.take(3000)}"
-                )
-            }
+            Log.i("ENSAR_SCRIPT", "SCRIPT[$i] DATA LENGTH=${text.length}")
+            Log.i("ENSAR_SCRIPT", "SCRIPT[$i] DATA=${text.take(10000)}")
         }
 
         page.select("iframe, video, embed").forEachIndexed { index, element ->
