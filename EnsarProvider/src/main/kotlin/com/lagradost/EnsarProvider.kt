@@ -222,6 +222,9 @@ class EnsarProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
 
+        println("ENSAR LINKS: loadLinks başladı")
+        println("ENSAR LINKS: data=$data")
+
         val page = app.get(
             data,
             headers = mapOf(
@@ -236,13 +239,23 @@ class EnsarProvider : MainAPI() {
                 it.attr("src").takeIf { src -> src.isNotBlank() }
                     ?: it.attr("data-src-no-ap").takeIf { src -> src.isNotBlank() }
             }
-            ?: return false
+            ?: run {
+                println("ENSAR LINKS: iframe bulunamadı")
+                return false
+            }
+
+        println("ENSAR LINKS: iframe=$iframeUrl")
 
         val filecode = iframeUrl
             .substringAfterLast("/")
             .substringBefore("?")
             .takeIf { it.isNotBlank() }
-            ?: return false
+            ?: run {
+                println("ENSAR LINKS: filecode bulunamadı")
+                return false
+            }
+
+        println("ENSAR LINKS: filecode=$filecode")
 
         val response = app.post(
             "https://vidara.to/api/stream",
@@ -257,25 +270,36 @@ class EnsarProvider : MainAPI() {
                 "filecode" to filecode,
                 "device" to "web"
             )
-        ).parsedSafe<VidaraStreamResponse>() ?: return false
+        ).parsedSafe<VidaraStreamResponse>()
+            ?: run {
+                println("ENSAR LINKS: Vidara response parse edilemedi")
+                return false
+            }
 
         val videoUrl = response.streaming_url
             .takeIf { it.startsWith("http") }
-            ?: return false
+            ?: run {
+                println("ENSAR LINKS: streaming_url yok")
+                return false
+            }
 
-        newExtractorLink(
+        println("ENSAR LINKS: videoUrl=$videoUrl")
+
+        val link = newExtractorLink(
             source = "Vidara",
             name = "Vidara",
             url = videoUrl,
             type = ExtractorLinkType.M3U8
         ) {
-            this.referer = "https://vidara.to/"
-            }
+            referer = "https://vidara.to/"
+        }
+
+        callback(link)
+
+        println("ENSAR LINKS: callback gönderildi")
 
         return true
     }
-
-
 
     data class VidaraStreamResponse(
 
