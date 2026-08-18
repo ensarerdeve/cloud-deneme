@@ -237,6 +237,43 @@ class EnsarProvider : MainAPI() {
         ).document
 
         Log.i("ENSAR_LINKS", "HTML IFRAME COUNT=${page.select("iframe").size}")
+
+// === ENSAR HTML INSPECTION ===
+val debugHtml = page.html()
+val lowerHtml = debugHtml.lowercase()
+
+Log.i("ENSAR_HTML", "RAW HTML SIZE=${debugHtml.length}")
+Log.i("ENSAR_HTML", "HAS IFRAME=${lowerHtml.contains("<iframe")}")
+Log.i("ENSAR_HTML", "HAS VIDEO=${lowerHtml.contains("<video")}")
+Log.i("ENSAR_HTML", "HAS SOURCE=${lowerHtml.contains("<source")}")
+Log.i("ENSAR_HTML", "HAS EMBED=${lowerHtml.contains("<embed")}")
+Log.i("ENSAR_HTML", "HAS M3U8=${lowerHtml.contains(".m3u8")}")
+Log.i("ENSAR_HTML", "HAS MP4=${lowerHtml.contains(".mp4")}")
+Log.i("ENSAR_HTML", "HAS PLAYER=${lowerHtml.contains("player")}")
+
+for (keyword in listOf("iframe", "video", "source", "embed", "m3u8", "mp4", "player")) {
+    var pos = 0
+    var count = 0
+
+    Log.i("ENSAR_HTML", "=== SEARCH $keyword ===")
+
+    while (count < 10) {
+        val found = lowerHtml.indexOf(keyword, pos)
+        if (found == -1) break
+
+        val from = maxOf(0, found - 250)
+        val to = minOf(debugHtml.length, found + 750)
+
+        Log.i("ENSAR_HTML", debugHtml.substring(from, to))
+
+        pos = found + keyword.length
+        count++
+    }
+
+    Log.i("ENSAR_HTML", "=== END $keyword COUNT=$count ===")
+}
+// === END ENSAR HTML INSPECTION ===
+
         Log.i("ENSAR_LINKS", "HTML VIDEO COUNT=${page.select("video").size}")
         Log.i("ENSAR_LINKS", "HTML EMBED COUNT=${page.select("embed").size}")
         Log.i("ENSAR_LINKS", "HTML SCRIPT COUNT=${page.select("script").size}")
