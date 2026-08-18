@@ -16,7 +16,10 @@ import com.lagradost.cloudstream3.utils.newExtractorLink
 
 
 
+
 class EnsarProvider : MainAPI() {
+
+
 
 
 
@@ -275,7 +278,8 @@ class EnsarProvider : MainAPI() {
                 "Sec-Fetch-Mode" to "navigate",
                 "Sec-Fetch-Site" to "same-origin",
                 "Upgrade-Insecure-Requests" to "1"
-            )
+            ),
+            interceptor = CloudflareKiller()
         )
 
         Log.i("ENSAR_RESPONSE", "STATUS=${httpResponse.code}")
