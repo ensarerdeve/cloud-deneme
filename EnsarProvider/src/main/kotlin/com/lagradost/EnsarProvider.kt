@@ -236,6 +236,17 @@ class EnsarProvider : MainAPI() {
             )
         ).document
 
+        Log.i("ENSAR_LINKS", "HTML IFRAME COUNT=${page.select("iframe").size}")
+        Log.i("ENSAR_LINKS", "HTML VIDEO COUNT=${page.select("video").size}")
+        Log.i("ENSAR_LINKS", "HTML EMBED COUNT=${page.select("embed").size}")
+
+        page.select("iframe, video, embed").forEachIndexed { index, element ->
+            Log.i(
+                "ENSAR_LINKS",
+                "ELEMENT[$index] tag=${element.tagName()} src=${element.attr("src")} data-src=${element.attr("data-src")} data-src-no-ap=${element.attr("data-src-no-ap")} outer=${element.outerHtml().take(1000)}"
+            )
+        }
+
         val iframeUrl = page.select("iframe[src], iframe[data-src-no-ap]")
             .firstOrNull()
             ?.let {
