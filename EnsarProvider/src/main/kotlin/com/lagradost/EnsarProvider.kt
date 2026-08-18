@@ -231,8 +231,14 @@ class EnsarProvider : MainAPI() {
         val httpResponse = app.get(
             data,
             headers = mapOf(
-                "User-Agent" to "Mozilla/5.0",
-                "Referer" to mainUrl
+                "User-Agent" to "Mozilla/5.0 (Linux; Android 13; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36",
+                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language" to "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Referer" to "https://www.porndish.com/",
+                "Sec-Fetch-Dest" to "document",
+                "Sec-Fetch-Mode" to "navigate",
+                "Sec-Fetch-Site" to "same-origin",
+                "Upgrade-Insecure-Requests" to "1"
             )
         )
 
