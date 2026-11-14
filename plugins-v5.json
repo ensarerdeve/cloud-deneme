@@ -38,10 +38,10 @@
     "name": "EnsarProvider"
   },
   {
-    "fileHash": "sha256-2d7a36ab4626fe032ada60763d2927f604f72192b279988d9b1eb02741455ada",
+    "fileHash": "sha256-cae272122a1ff99440ed224c1919f627d6d9c61e7b3328759303e1fec1855742",
     "apiVersion": 1,
     "repositoryUrl": "https://github.com/ensarerdeve/cloud-deneme",
-    "fileSize": 13385,
+    "fileSize": 13487,
     "status": 1,
     "language": "en",
     "authors": [
@@ -50,7 +50,7 @@
     "tvTypes": [
       "Movie"
     ],
-    "version": 41,
+    "version": 42,
     "internalName": "OppaiProvider",
     "description": "Ensar Stream video provider",
     "url": "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/repo/OppaiProvider.cs3",
