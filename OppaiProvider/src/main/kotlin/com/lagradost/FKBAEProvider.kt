@@ -126,36 +126,62 @@ class OppaiProvider : MainAPI() {
         val html = response.text
         val document = response.document
 
-        val videoUrl = Regex(
-            """"contentUrl"\s*:\s*"([^"]+)""""
+        fun getVariable(name: String): String? {
+            return Regex("""var\s+$name\s*=\s*"([^"]+)"""")
+                .find(html)?.groupValues?.get(1)
+        }
+
+        val folder = getVariable("folder")
+            ?.replace("\\/", "/") ?: return false
+        val storageBase = getVariable("storageBase") ?: return false
+        val episode = getVariable("ep") ?: return false
+
+        val resolutions = Regex(
+            """var\s+resList\s*=\s*\[([^\]]+)]"""
         ).find(html)?.groupValues?.get(1)
-            ?: return false
+            ?.let {
+                Regex(""""([^"]+)"""").findAll(it)
+                    .map { match -> match.groupValues[1] }.toList()
+            } ?: return false
+
+        val encodedFolder = folder.split("/").joinToString("/") {
+            java.net.URLEncoder.encode(it, "UTF-8").replace("+", "%20")
+        }
+
+        val paddedEpisode = episode.toIntOrNull()
+            ?.toString()?.padStart(2, '0') ?: return false
 
         val subtitle = document.selectFirst(
             "video#episode track[src][kind=subtitles]"
         )?.attr("src")
 
         if (!subtitle.isNullOrBlank()) {
-            subtitleCallback(
-                SubtitleFile(
-                    "English",
-                    fixUrl(subtitle)
-                )
-            )
+            subtitleCallback(SubtitleFile("English", fixUrl(subtitle)))
         }
 
-        callback(
-            newExtractorLink(
-                source = name,
-                name = "Direct WebM",
-                url = videoUrl,
-                type = ExtractorLinkType.VIDEO
-            ) {
-                this.referer = data
-                this.quality = 1080
-            }
-        )
+        var added = false
 
-        return true
+        for (res in resolutions) {
+            val folderName = if (res == "4k") "4K" else "${res}p"
+            val extension = if (res == "4k") "webm" else "mp4"
+
+            val videoUrl =
+                "${storageBase.trimEnd('/')}/$encodedFolder/$folderName/E$paddedEpisode.$extension"
+
+            callback(
+                newExtractorLink(
+                    source = name,
+                    name = if (res == "4k") "4K" else "${res}p",
+                    url = videoUrl,
+                    type = ExtractorLinkType.VIDEO
+                ) {
+                    this.referer = data
+                    this.quality = if (res == "4k") 2160 else res.toInt()
+                }
+            )
+            added = true
+        }
+
+        return added
     }
 }
