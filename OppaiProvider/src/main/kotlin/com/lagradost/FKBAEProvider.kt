@@ -5,6 +5,11 @@ import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.ExtractorLinkType
 import com.lagradost.cloudstream3.utils.newExtractorLink
 import org.jsoup.nodes.Element
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 class OppaiProvider : MainAPI() {
 
@@ -20,26 +25,26 @@ class OppaiProvider : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/" to "Latest",
-        "$mainUrl/category/uncensored" to "Uncensored Fight",
-        "$mainUrl/category/rap" to "Rap Music",
-        "$mainUrl/category/incect" to "Incects",
-        "$mainUrl/category/big" to "Big Plays",
-        "$mainUrl/category/shot" to "One Shot"
+        "$mainUrl/categories" to "Categories"
     )
 
     private fun Element.toVideo(): SearchResponse? {
         val href = attr("href").trim()
         if (!href.contains("/watch/")) return null
 
+        val cover = selectFirst("img.cover")
+            ?: selectFirst("img[data-src]")
+            ?: selectFirst("img")
+
         val title = attr("title").ifBlank {
-            selectFirst("img")?.attr("alt").orEmpty()
+            cover?.attr("alt").orEmpty()
         }.ifBlank {
             text().trim()
         }
 
         if (title.isBlank()) return null
 
-        val poster = selectFirst("img")?.let {
+        val poster = cover?.let {
             it.attr("data-src").ifBlank { it.attr("src") }
         }?.takeIf { it.isNotBlank() }
 
@@ -56,12 +61,71 @@ class OppaiProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
+        if (request.data.trimEnd('/') == "$mainUrl/categories") {
+            val categoryDocument = app.get(request.data).document
+
+            val blockedTerms = listOf(
+                "shota", "loli", "lolita",
+                "schoolgirl", "schoolboy",
+                "underage", "minor", "child", "teen"
+            )
+
+            val categories = categoryDocument
+                .select("a.category-card[href*=/category/]")
+                .mapNotNull { element ->
+                    val href = element.attr("href").trim()
+                    if (href.isBlank()) return@mapNotNull null
+
+                    val cover = element.selectFirst("img.cover")
+                    val label = cover?.attr("alt")
+                        ?.ifBlank { element.text().trim() }
+                        ?: element.text().trim()
+
+                    if (label.isBlank()) return@mapNotNull null
+
+                    val identity = "$href $label".lowercase()
+                    if (blockedTerms.any { identity.contains(it) }) {
+                        return@mapNotNull null
+                    }
+
+                    Pair(label, fixUrl(href))
+                }
+                .distinctBy { it.second }
+
+            val semaphore = Semaphore(4)
+
+            val rows = coroutineScope {
+                categories.map { (categoryName, categoryUrl) ->
+                    async {
+                        semaphore.withPermit {
+                            try {
+                                val document = app.get(categoryUrl).document
+                                val videos = document
+                                    .select("a[href*=/watch/]")
+                                    .mapNotNull { it.toVideo() }
+                                    .distinctBy { it.url }
+
+                                if (videos.isEmpty()) null
+                                else HomePageList(categoryName, videos)
+                            } catch (e: Exception) {
+                                println("ENSAR CATEGORY ERROR $categoryName: ${e.message}")
+                                null
+                            }
+                        }
+                    }
+                }.awaitAll().filterNotNull()
+            }
+
+            println("ENSAR CATEGORIES FOUND: ${categories.size}")
+            println("ENSAR CATEGORY ROWS LOADED: ${rows.size}")
+
+            return newHomePageResponse(rows, hasNext = false)
+        }
+
         val url = if (page <= 1) {
             request.data
         } else {
-            "${
-                request.data
-            }?page=$page"
+            "${request.data}?page=$page"
         }
 
         val document = app.get(url).document
@@ -131,18 +195,42 @@ class OppaiProvider : MainAPI() {
                 .find(html)?.groupValues?.get(1)
         }
 
-        val folder = getVariable("folder")
-            ?.replace("\\/", "/") ?: return false
-        val storageBase = getVariable("storageBase") ?: return false
-        val episode = getVariable("ep") ?: return false
+        println("ENSAR DEBUG LOADLINKS ENTERED: $data")
 
-        val resolutions = Regex(
-            """var\s+resList\s*=\s*\[([^\]]+)]"""
+        val folderRaw = getVariable("folder")
+        val storageRaw = getVariable("storageBase")
+        val episodeRaw = getVariable("ep")
+
+        println("ENSAR DEBUG folderRaw=$folderRaw")
+        println("ENSAR DEBUG storageRaw=$storageRaw")
+        println("ENSAR DEBUG episodeRaw=$episodeRaw")
+
+        val folder = folderRaw?.replace("\\/", "/") ?: run {
+            println("ENSAR DEBUG FAILED: folder missing")
+            return false
+        }
+
+        val storageBase = storageRaw?.replace("\\/", "/") ?: run {
+            println("ENSAR DEBUG FAILED: storageBase missing")
+            return false
+        }
+
+        val episode = episodeRaw ?: run {
+            println("ENSAR DEBUG FAILED: ep missing")
+            return false
+        }
+
+        val resolutionBlock = Regex(
+            """resList\s*=\s*\[([^\]]*)]"""
         ).find(html)?.groupValues?.get(1)
-            ?.let {
-                Regex(""""([^"]+)"""").findAll(it)
-                    .map { match -> match.groupValues[1] }.toList()
-            } ?: return false
+
+        val resolutions = resolutionBlock?.let {
+            Regex(""""([^"]+)"""").findAll(it)
+                .map { match -> match.groupValues[1] }.toList()
+        } ?: emptyList()
+
+        println("ENSAR DEBUG HTML RESOLUTIONS: $resolutionBlock")
+        println("ENSAR DEBUG PARSED RESOLUTIONS: $resolutions")
 
         val encodedFolder = folder.split("/").joinToString("/") {
             java.net.URLEncoder.encode(it, "UTF-8").replace("+", "%20")
@@ -168,10 +256,12 @@ class OppaiProvider : MainAPI() {
             val videoUrl =
                 "${storageBase.trimEnd('/')}/$encodedFolder/$folderName/E$paddedEpisode.$extension"
 
+                val qualityName = if (res == "4k") "4K" else "${res}p"
+
             callback(
                 newExtractorLink(
                     source = name,
-                    name = if (res == "4k") "4K" else "${res}p",
+                    name = qualityName,
                     url = videoUrl,
                     type = ExtractorLinkType.VIDEO
                 ) {
