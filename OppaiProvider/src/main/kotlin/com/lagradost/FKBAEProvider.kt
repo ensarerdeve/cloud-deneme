@@ -229,6 +229,14 @@ class OppaiProvider : MainAPI() {
                 .map { match -> match.groupValues[1] }.toList()
         } ?: emptyList()
 
+        if (resolutions.none {
+            it.equals("1080", ignoreCase = true) ||
+            it.equals("720", ignoreCase = true)
+        }) {
+            println("ENSAR DEBUG: Skipped - no 1080p or 720p")
+            return false
+        }
+
         println("ENSAR DEBUG HTML RESOLUTIONS: $resolutionBlock")
         println("ENSAR DEBUG PARSED RESOLUTIONS: $resolutions")
 
