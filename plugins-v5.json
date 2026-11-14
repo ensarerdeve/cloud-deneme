@@ -50,7 +50,7 @@
     "tvTypes": [
       "Movie"
     ],
-    "version": 44,
+    "version": 45,
     "internalName": "OppaiProvider",
     "description": "Ensar Stream video provider",
     "url": "https://raw.githubusercontent.com/ensarerdeve/cloud-deneme/main/repo/OppaiProvider.cs3",
